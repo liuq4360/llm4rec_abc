@@ -1,0 +1,82 @@
+{
+    "os": "macOS-14.1-arm64-arm-64bit",
+    "python": "3.10.13",
+    "heartbeatAt": "2024-02-06T06:26:06.356225",
+    "startedAt": "2024-02-06T06:26:06.295897",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--item_indexing",
+        "sequential",
+        "--tasks",
+        "sequential,straightforward",
+        "--dataset",
+        "mind",
+        "--epochs",
+        "1",
+        "--batch_size",
+        "1024",
+        "--backbone",
+        "t5-small",
+        "--cutoff",
+        "1024",
+        "--data_path",
+        "/Users/liuqiang/Desktop/code/llm4rec/llm4rec_abc/src/train-llm/data",
+        "--valid_prompt",
+        "seen:0",
+        "--model_dir",
+        "/Users/liuqiang/Desktop/code/llm4rec/llm4rec_abc/src/train-llm/models",
+        "--lr",
+        "1e-3",
+        "--valid_select",
+        "1",
+        "--warmup_steps",
+        "100",
+        "--gradient_accumulation_steps",
+        "10",
+        "--logging_steps",
+        "10",
+        "--optim",
+        "adamw_torch"
+    ],
+    "state": "running",
+    "program": "/Users/liuqiang/Desktop/code/llm4rec/llm4rec_abc/src/train-llm/pre-train/t5_pre-train.py",
+    "codePathLocal": "t5_pre-train.py",
+    "codePath": "src/train-llm/pre-train/t5_pre-train.py",
+    "git": {
+        "remote": "https://github.com/liuq4360/llm4rec_abc.git",
+        "commit": "81329667113a25fac96d63a342b8ea6bfa146445"
+    },
+    "email": "liuqiang@vowei.com",
+    "root": "/Users/liuqiang/Desktop/code/llm4rec/llm4rec_abc",
+    "host": "liuqiangdeMacBook-Pro.local",
+    "username": "liuqiang",
+    "executable": "/Users/liuqiang/miniconda3/envs/train-llm/bin/python",
+    "cpu_count": 16,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 4056,
+        "min": 1020,
+        "max": 4056
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 4056,
+            "min": 1020,
+            "max": 4056
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 1858.1917190551758,
+            "used": 12.597587585449219
+        }
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 128.0
+    }
+}
