@@ -1,0 +1,1 @@
+{"version": "v2.4", "vocab_info": {"uid": {"size": 94057, "cols": ["uid"]}, "nid": {"size": 65238, "cols": ["history"]}}, "col_info": {"uid": {"vocab": "uid"}, "history": {"vocab": "nid", "max_length": 30, "padding": false}}, "id_col": "uid"}
