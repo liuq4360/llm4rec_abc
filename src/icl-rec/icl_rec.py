@@ -194,4 +194,5 @@ def icl_rec_batch(validation_path: str, icl_type='llamacpp'):
 
 if __name__ == "__main__":
     # fire.Fire(icl_rec)
-    icl_rec_batch("data/mind/test.json")
+    icl_rec(icl_type="llamacpp")
+    # icl_rec_batch("data/mind/test.json")
