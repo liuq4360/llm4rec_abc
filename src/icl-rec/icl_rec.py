@@ -179,7 +179,7 @@ def icl_rec(
 
 def icl_rec_batch(validation_path: str, icl_type='llamacpp'):
     """
-        针对从训练数据构建的验证集，逐条为用户进行icl推理，你可以跟真实值（即output）对比，查看大模型icl推荐的效果
+        针对从训练数据构建的测试集，逐条为用户进行icl推理，你可以跟真实值（即output）对比，查看大模型icl推荐的效果
     """
     data = load_dataset("json", data_files=validation_path)
     index = 1
@@ -194,4 +194,4 @@ def icl_rec_batch(validation_path: str, icl_type='llamacpp'):
 
 if __name__ == "__main__":
     # fire.Fire(icl_rec)
-    icl_rec_batch("./data/mind/validation.json")
+    icl_rec_batch("data/mind/test.json")

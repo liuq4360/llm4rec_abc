@@ -2,7 +2,7 @@ import csv
 import json
 
 """
-按照如下格式构建训练数据集：
+按照如下格式构建验证数据集：
 
 {
 
@@ -105,6 +105,6 @@ with open('../data/mind/behaviors.tsv', 'r') as file:
             data_list.append(res_dic)
 
 res = json.dumps(data_list)
-user_sequence_path = "../data/mind/validation.json"  # 将生成的训练数据保存起来
+user_sequence_path = "../data/mind/test.json"  # 将生成的训练数据保存起来
 with open(user_sequence_path, 'a') as file:
     file.write(res)
