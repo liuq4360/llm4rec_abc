@@ -47,7 +47,6 @@ df_joined.dropna(how='any', subset=["asin", "brand", "category"], inplace=True)
 # df_joined.drop_duplicates()
 df_joined = df_joined.reset_index(drop=True)
 
-
 """
 计算每个用户最喜欢的top3的品牌和分类
 """
@@ -94,12 +93,11 @@ for name, group in grouped:
         category_top_3 = [x for (x, _) in sorted(category_dic.items(), key=lambda x: x[1], reverse=True)[0:TOP_THREE]]
         category_interest = ""
         for i in category_top_3:
-            category_interest = category_interest + "," +i
+            category_interest = category_interest + "," + i
         category_interest = category_interest[1:]
         category_list.append(category_interest)
 # 创建用户兴趣画像DataFrame。
 df_interest = pd.DataFrame({'reviewerID': reviewerID_list, 'top_3_category': category_list, 'top_3_brand': brand_list})
-
 
 """
 join相关数据，将数据放到同一个DataFrame中
@@ -137,11 +135,37 @@ df['common_category'] = df.apply(lambda x: common_category(x['category'], x['top
 
 
 def goods_description(common_b, common_ca):
-    return common_b + "," + common_ca
+    if common_b and common_ca:
+        return common_b + "," + common_ca
+    elif common_b:
+        return common_b
+    elif common_ca:
+        return common_ca
+    else:
+        return ""
 
 
 df['goods_description'] = df.apply(lambda x: goods_description(x['common_brand'], x['common_category']), axis=1)
-df.drop(['common_brand', 'common_category'], axis=1, inplace=True)
-# 将数据存起来，避免每次重新开始计算
-df.to_pickle("./data/goods_description.plk")
-df = pd.read_pickle("./data/goods_description.plk")
+df.dropna(how='any', subset=['reviewerID', 'asin', 'brand', 'category', 'top_3_category',
+                             'top_3_brand', 'goods_description'], inplace=True)
+df = df.reset_index(drop=True)
+
+
+prompt = """The following are the the product brand and category data: \n
+ product brand: {} \n
+ product category: {}  \n
+ The following are the user's interests and preferences for product brands and categories:\n 
+ the top three brands user likes: {} \n
+ the top three categories user likes: {} \n
+ Based on the above information, predict the description label of the product, which is obtained from the
+ brand and category of the product (i.e., the description label is a subset of the brand and category of
+ the product). The description label you provide should meet the user's preferences for the brand and
+ category of the product to the greatest extent possible. You just need to list one to four description labels, 
+ do not explain the reason.If you given more than one description labels, please separate them with comma."""
+
+df['prompt'] = df.apply(lambda row: prompt.format(str(row['brand']), str(row['category']),
+                                                  str(row['top_3_brand']), str(row['top_3_category'])), axis=1)
+
+df = df[['prompt', 'goods_description']]
+print(df.shape)
+df.to_csv("./data/item_info_data.csv", index=False)

@@ -2,17 +2,9 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from datasets import Dataset, DatasetDict
 
-df = pd.read_pickle("./data/goods_description.plk")
+df = pd.read_csv("./data/item_info_data.csv")
 
 train_df, test_df = train_test_split(df, test_size=0.3, random_state=42)
-train_df['text'] = train_df.apply(lambda row: "goods brand: " + row['brand'] + "\n" + "goods category: " +
-                                              str(row['category'])
-                                              + "\n" + "the top three brands user likes: " + row['top_3_brand'] + "\n" +
-                                              "the top three categories user likes: " + row['top_3_category'], axis=1)
-test_df['text'] = test_df.apply(lambda row: "goods brand: " + row['brand'] + "\n" + "goods category: " +
-                                            str(row['category'])
-                                            + "\n" + "the top three brands user likes: " + row['top_3_brand'] + "\n" +
-                                            "the top three categories user likes: " + row['top_3_category'], axis=1)
 train_dataset_dict = DatasetDict({
     "train": Dataset.from_pandas(train_df, preserve_index=False),
 })
@@ -21,7 +13,7 @@ import torch
 import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model_name = "/Users/liuqiang/Desktop/code/llm/models/Qwen1.5-14B"
+model_name = "/Users/liuqiang/Desktop/code/llm/models/Qwen1.5-4B"
 device_map = "auto"
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
@@ -35,8 +27,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"  # Fix weird overflow issue with fp16 training
 
-sample_size = 5
-sample_test_data = list(test_df['text'])
+sample_size = 2
+sample_test_data = list(test_df['prompt'])
 sample_test_data = sample_test_data[:sample_size]
 
 num_beams = 2
@@ -101,7 +93,7 @@ num_train_epochs = 1
 fp16 = False
 bf16 = False
 # Batch size per GPU for training
-per_device_train_batch_size = 16
+per_device_train_batch_size = 8
 # Batch size per GPU for evaluation
 per_device_eval_batch_size = 4
 # Number of update steps to accumulate the gradients for
@@ -152,7 +144,7 @@ training_arguments = TrainingArguments(
 
 # 将训练数据转为大模型微调需要的数据格式
 def formatting_func(example):
-    text = f"{example['text'][0]}\n {example['goods_description'][0]}"
+    text = f"{example['prompt'][0]}\n {example['goods_description'][0]}"
     return [text]
 
 
@@ -222,3 +214,20 @@ for ix, seq in enumerate(sequences):
 sample_test_result = list(test_df['goods_description'])
 sample_test_result = sample_test_result[:sample_size]
 print(sample_test_result)
+
+
+"""
+让大模型基于个性化的商品关键词，用一句话生成个性化的商品描述信息
+"""
+sample_test_data = ["""Describe the product in one sentence, which must include keywords such as Toys,Games and ARRIS. 
+                     "Please answer in English, no less than 10 words and no more than 20 words."""]
+sequences = pipeline(
+    sample_test_data,
+    max_new_tokens=2048,
+    do_sample=True,
+    top_k=10,
+    num_return_sequences=1,
+    eos_token_id=tokenizer.eos_token_id,
+)
+for seq in sequences:
+    print(f"Result\n: {seq[0]['generated_text']} \n")
