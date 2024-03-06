@@ -90,6 +90,6 @@ for name, group in grouped:
         brand_list.append(brand_top_2)
 # 创建用户兴趣画像DataFrame，这里我忽略了reviewerID，在实际使用过程中，我只要获得用户
 # 喜欢过的品牌名，然后利用大模型生成用户最喜欢的2个品牌画像
-df = pd.DataFrame({'prompt': prompt_list, 'like_brand': brand_list})
+df = pd.DataFrame({'prompt': prompt_list, 'label': brand_list})
 print(df.shape)
 df.to_csv("./data/portrait_data.csv", index=False)

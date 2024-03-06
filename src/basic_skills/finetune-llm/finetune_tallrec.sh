@@ -1,7 +1,7 @@
 
 python finetune_tallrec.py \
     --base_model '/Users/liuqiang/Desktop/code/llm/models/chinese-alpaca-2-7b' \
-    --data_path '/Users/liuqiang/Desktop/code/llm4rec/llm4rec_abc/src/finetune-llm/data/mind/train.json' \
+    --data_path '/Users/liuqiang/Desktop/code/llm4rec/llm4rec_abc/src/basic_skills/finetune-llm/data/mind/train.json' \
     --output_dir './lora-weights' \
     --batch_size 128 \
     --micro_batch_size 4 \

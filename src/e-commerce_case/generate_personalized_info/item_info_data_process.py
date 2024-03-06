@@ -145,9 +145,9 @@ def goods_description(common_b, common_ca):
         return ""
 
 
-df['goods_description'] = df.apply(lambda x: goods_description(x['common_brand'], x['common_category']), axis=1)
+df['label'] = df.apply(lambda x: goods_description(x['common_brand'], x['common_category']), axis=1)
 df.dropna(how='any', subset=['reviewerID', 'asin', 'brand', 'category', 'top_3_category',
-                             'top_3_brand', 'goods_description'], inplace=True)
+                             'top_3_brand', 'label'], inplace=True)
 df = df.reset_index(drop=True)
 
 
@@ -166,6 +166,6 @@ prompt = """The following are the the product brand and category data: \n
 df['prompt'] = df.apply(lambda row: prompt.format(str(row['brand']), str(row['category']),
                                                   str(row['top_3_brand']), str(row['top_3_category'])), axis=1)
 
-df = df[['prompt', 'goods_description']]
+df = df[['prompt', 'label']]
 print(df.shape)
 df.to_csv("./data/item_info_data.csv", index=False)
