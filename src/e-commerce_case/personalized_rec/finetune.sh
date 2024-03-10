@@ -2,10 +2,10 @@
 python model_finetune.py \
     --base_model '/Users/liuqiang/Desktop/code/llm/models/Qwen1.5-4B' \
     --data_path '/Users/liuqiang/Desktop/code/llm4rec/llm4rec_abc/src/e-commerce_case/personalized_rec/data/train.json' \
-    --output_dir './lora-weights' \
-    --batch_size 64 \
+    --output_dir './models' \
+    --batch_size 16 \
     --micro_batch_size 4 \
-    --num_epochs 5 \
+    --num_epochs 1 \
     --learning_rate 5e-4 \
     --cutoff_len 512 \
     --val_set_size 200 \

@@ -4,41 +4,40 @@ import fire
 import gradio as gr
 import torch
 import transformers
-from peft import PeftModel
-from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
+from transformers import GenerationConfig, AutoModelForCausalLM, AutoTokenizer
 from utils.callbacks import Iteratorize, Stream
 from utils.prompter import Prompter
 
 
 def main(
     load_8bit: bool = False,
-    base_model: str = "",
-    lora_weights: str = "./lora-weights",
+    finetune_model: str = "./models",
+    # lora_weights: str = "./lora-weights",
     prompt_template: str = "",  # The prompt template to use, will default to alpaca.
-    server_name: str = "0.0.0.0",  # Allows to listen on all interfaces by providing '0.
+    server_name: str = "localhost",  # Allows to listen on all interfaces by providing '0.
     share_gradio: bool = False,
 ):
-    base_model = base_model or os.environ.get("BASE_MODEL", "")
+    finetune_model = finetune_model or os.environ.get("FINETUNE_MODEL", "")
     assert (
-        base_model
-    ), "Please specify a --base_model, e.g. --base_model='huggyllama/llama-7b'"
+        finetune_model
+    ), "Please specify a --finetune_model, e.g. --finetune_model='huggyllama/llama-7b'"
 
     prompter = Prompter(prompt_template)
-    tokenizer = LlamaTokenizer.from_pretrained(base_model)
+    tokenizer = AutoTokenizer.from_pretrained(finetune_model)
 
     device_map = "mps"
 
-    model = LlamaForCausalLM.from_pretrained(
-        base_model,
+    model = AutoModelForCausalLM.from_pretrained(
+        finetune_model,
         device_map=device_map,
         torch_dtype=torch.float16,
     )
-    model = PeftModel.from_pretrained(
-        model,
-        lora_weights,
-        device_map=device_map,
-        torch_dtype=torch.float16,
-    )
+    # model = PeftModel.from_pretrained(
+    #     model,
+    #     lora_weights,
+    #     device_map=device_map,
+    #     torch_dtype=torch.float16,
+    # )
 
     # unwind broken decapoda-research config
     model.config.pad_token_id = tokenizer.pad_token_id = 0  # unk
@@ -85,7 +84,6 @@ def main(
         if stream_output:
             # Stream the reply 1 token at a time.
             # This is based on the trick of using 'stopping_criteria' to create an iterator,
-            # from https://github.com/oobabooga/text-generation-webui/blob/ad37f396fc8bcbab90e11ecf17c56c97bfbd4a9c/modules/text_generation.py#L216-L243.
             def generate_with_callback(callback=None, **kwargs):
                 kwargs.setdefault(
                     "stopping_criteria", transformers.StoppingCriteriaList()
@@ -157,8 +155,8 @@ def main(
                 label="Output",
             )
         ],
-        title="🦙🌲 Alpaca-LoRA",
-        description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
+        title="LLM-based personalized recommendation",
+        description="通过预测用户的评分，来评估用户对商品的偏好，进而为用户生成个性化推荐",  # noqa: E501
     ).queue().launch(server_name=server_name, share=share_gradio)
 
 

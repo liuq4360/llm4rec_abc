@@ -7,7 +7,7 @@ from peft import (
     LoraConfig,
     get_peft_model,
     prepare_model_for_int8_training,
-    set_peft_model_state_dict,
+    set_peft_model_state_dict, PeftModel,
 )
 from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, DataCollatorForSeq2Seq, TrainingArguments
 from utils.prompter import Prompter
@@ -17,7 +17,7 @@ def train(
     # model/data params
     base_model: str = "",  # the only required argument
     data_path: str = "./data/train.json",
-    output_dir: str = "./lora-weights",
+    output_dir: str = "./models",
     # training hyperparams
     batch_size: int = 128,
     micro_batch_size: int = 4,
@@ -141,7 +141,7 @@ def train(
         bias="none",
         task_type="CAUSAL_LM",
     )
-    model = get_peft_model(model, config)
+    peft_model = get_peft_model(model, config)
 
     if data_path.endswith(".json") or data_path.endswith(".jsonl"):  # 数据是JSON或者JSONL格式
         data = load_dataset("json", data_files=data_path)
@@ -164,11 +164,11 @@ def train(
         if os.path.exists(checkpoint_name):
             print(f"Restarting from {checkpoint_name}")
             adapters_weights = torch.load(checkpoint_name)
-            set_peft_model_state_dict(model, adapters_weights)
+            set_peft_model_state_dict(peft_model, adapters_weights)
         else:
             print(f"Checkpoint {checkpoint_name} not found")
 
-    model.print_trainable_parameters()  # Be more transparent about the % of trainable params.
+    peft_model.print_trainable_parameters()  # Be more transparent about the % of trainable params.
 
     if val_set_size > 0:
         train_val = data["train"].train_test_split(
@@ -186,11 +186,11 @@ def train(
 
     if not ddp and torch.cuda.device_count() > 1:
         # keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
-        model.is_parallelizable = True
-        model.model_parallel = True
+        peft_model.is_parallelizable = True
+        peft_model.model_parallel = True
 
     trainer = Trainer(
-        model=model,
+        model=peft_model,
         train_dataset=train_data,
         eval_dataset=val_data,
         args=TrainingArguments(
@@ -217,11 +217,20 @@ def train(
             tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
         ),
     )
-    model.config.use_cache = False
+    peft_model.config.use_cache = False
 
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
-    model.save_pretrained(output_dir)
+    # lora权重保存
+    trainer.model.save_pretrained(output_dir)
+    tokenizer.save_pretrained(output_dir)
+
+    # lora权重跟原始模型合并，并保存
+    model_to_merge = PeftModel.from_pretrained(
+        AutoModelForCausalLM.from_pretrained(base_model), output_dir)
+
+    merged_model = model_to_merge.merge_and_unload()
+    merged_model.save_pretrained(output_dir)
 
 
 if __name__ == "__main__":

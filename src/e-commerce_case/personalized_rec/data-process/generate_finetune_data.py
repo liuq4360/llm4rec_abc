@@ -31,7 +31,6 @@ Based on above rating history, please predict user's rating for the following pr
    }           
                  
 The ranking is between 1 and 5, 1 being lowest and 5 being highest. 
-for example, The output should be like: 3.
 You just need to ranking the above product, do not explain the reason.
                               
 "output": 3
@@ -87,18 +86,20 @@ def generate_data(data_df, data_type, path):
         user_ranking_list = []
         for _, row_ in selected_df.iterrows():
             item = row_['item']
-            rating = row_['rating']
-            item_info_ = item_dict[item]
-            item_info_['rating'] = rating
-            user_ranking_list.append(item_info_)
+            if item in item_dict:
+                rating = row_['rating']
+                item_info_ = item_dict[item]
+                item_info_['rating'] = rating
+                user_ranking_list.append(item_info_)
         formatted_user_ranking = json.dumps(user_ranking_list, indent=4)
 
         item = last_row['item']
         rating = last_row['rating']
-        item_info_ = item_dict[item]
-        formatted_item_info = json.dumps(item_info_, indent=4)
+        label_item_info_ = item_dict[item]
+        if 'rating' in label_item_info_:
+            del label_item_info_['rating']  # 去掉rating，这个是需要待预测的
 
-        item_info_['rating'] = rating
+        formatted_item_info = json.dumps(label_item_info_, indent=4)
 
         input = ("I've ranked the following products in the past(in JSON format):\n\n" +
 
@@ -110,7 +111,6 @@ def generate_data(data_df, data_type, path):
                  formatted_item_info + "\n\n" +
 
                  "The ranking is between 1 and 5, 1 being lowest and 5 being highest. " +
-                 "for example, The output should be like: 3. " +
                  "You just need to ranking the above product, do not explain the reason."
                  )
 
@@ -137,7 +137,7 @@ generate_data(train_df, "train", train_path)
 generate_data(test_df, "test", test_path)
 
 """
-    目前train.json 1016个样本。
-    目前test.json 5413个样本。
+    目前train.json 989个样本。
+    目前test.json 5517个样本。
     因为train要求每个用户至少要有4个以上的记录。
 """
