@@ -2,7 +2,7 @@ import csv
 import json
 
 
-def get_metadata_dict(path: str = '../data/amazon_review/beauty/meta_All_Beauty.json') -> dict:
+def get_metadata_dict(path: str = '../../data/amazon_review/beauty/meta_All_Beauty.json') -> dict:
     item_dict = {}  # meta_All_Beauty.json中获取每个item对应的信息
     """
     {"category": [], "tech1": "", "description": ["Start Up combines citrus essential oils with gentle Alpha Hydroxy Acids to cleanse and refresh your face. The 5% AHA level is gentle enough for all skin types.", "", ""], 
@@ -24,14 +24,18 @@ def get_metadata_dict(path: str = '../data/amazon_review/beauty/meta_All_Beauty.
             title = j['title']
             brand = j['brand']
             description = j['description']
+            price = j['price']
             also_buy = j['also_buy']
             also_view = j['also_view']
+            if price != "" and '$' not in price and len(price) > 10:  # 处理一些异常数据情况
+                price = ""
             item_info = {
                 "title": title,
                 "brand": brand,
                 "description": description,
                 "also_buy": also_buy,
-                "also_view": also_view
+                "also_view": also_view,
+                "price": price
             }
             item_dict[item_id] = item_info
     return item_dict

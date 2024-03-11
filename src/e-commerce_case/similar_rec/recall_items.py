@@ -1,5 +1,9 @@
+import sys
 import operator
+import importlib
 from sentence_transformers import SentenceTransformer
+sys.path.append('./data-process')
+generate_item_dict = importlib.import_module('generate_item_dict')
 
 
 def tags_recall(item_id: str, item_dict: dict) -> [str]:
@@ -76,8 +80,7 @@ def also_view_recall(item_id: str, item_dict: dict) -> [str]:
 
 
 if __name__ == "__main__":
-    from data_process import get_metadata_dict
-    item_dict = get_metadata_dict()
+    item_dict = generate_item_dict.get_metadata_dict()
     print("----------")
     print(embedding_recall("B00006IGL2", item_dict, 10, 0.75))
     print("----------")

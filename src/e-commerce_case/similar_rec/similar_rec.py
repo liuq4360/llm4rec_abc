@@ -1,6 +1,9 @@
 import json
-
+import sys
+import importlib
 from sentence_transformers import CrossEncoder
+sys.path.append('./data-process')
+generate_item_dict = importlib.import_module('generate_item_dict')
 
 
 def rerank_recall(item_id: str,
@@ -60,8 +63,7 @@ if __name__ == "__main__":
     also_buy_recall = ['B000Z96JDI', 'B00006IGL8', 'B007C5X34G', 'B00006IGLF', 'B00213WCNC', 'B00D1W1QXE', 'B001FB5HZG',
                        'B000FQ86RI', 'B0012BSKBM', 'B0085EVLRO', 'B00A2EXVQE']
     band_recall = ['B00028EYZW', 'B001E0T0HE', 'B00FTBJ6HI', 'B00KLDU08S', 'B00OQQWU4I']
-    from data_process import get_metadata_dict
-    item_dict = get_metadata_dict()
+    item_dict = generate_item_dict.get_metadata_dict()
     print("----------")
     res = rerank_recall("B00006IGL2",
                         [embedding_recall, also_buy_recall, also_view_recall,band_recall],

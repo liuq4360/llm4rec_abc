@@ -123,7 +123,7 @@ def generate_data(data_df, data_type, path):
         }
         data_list.append(res_dic)
 
-    res = json.dumps(data_list)
+    res = json.dumps(data_list, indent=4, ensure_ascii=False)
     with open(path, 'a') as file_:  # 将生成的训练数据保存起来
         file_.write(res)
 
