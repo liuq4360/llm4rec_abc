@@ -135,5 +135,3 @@ def effect_comparison(base_model_path: str = '/Users/liuqiang/Desktop/code/llm/m
 if __name__ == "__main__":
     fire.Fire(effect_comparison)
 
-# 基底模型的平均rmse：0.40142135623730946
-# 微调模型的平均rmse：0.3

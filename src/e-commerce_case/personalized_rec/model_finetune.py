@@ -222,8 +222,8 @@ def train(
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
     # lora权重保存
-    trainer.model.save_pretrained(output_dir)
-    tokenizer.save_pretrained(output_dir)
+    trainer.model.save_pretrained(output_dir) # 保存模型向量
+    tokenizer.save_pretrained(output_dir)  # 保存token
 
     # lora权重跟原始模型合并，并保存
     model_to_merge = PeftModel.from_pretrained(
