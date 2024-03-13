@@ -235,3 +235,5 @@ def train(
 
 if __name__ == "__main__":
     fire.Fire(train)
+
+# 这里的模型finetune代码跟personalized_rec中的完全一样
