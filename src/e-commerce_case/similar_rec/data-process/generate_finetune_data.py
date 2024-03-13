@@ -28,10 +28,10 @@ two products are similar based on your professional knowledge.",
     }
 ]
 
-Based on above information, please predict if these two products are similar. The similarity  is between 0 and 1, 
-0 being lowest and 1 being highest. You just need to ranking the above product, do not explain the reason.
+Based on above information, please predict if these two products are similar. The similarity  is between 0 and 2, 
+0 being lowest and 2 being highest. You just need to ranking the above product, do not explain the reason.
 
-"output": 0
+"output": "0"
 
 }
 
@@ -40,7 +40,8 @@ Based on above information, please predict if these two products are similar. Th
 """
 构建训练集、测试集的思路：
 基于metadata数据集中also_buy、also_view 字段，某个商品与also_buy、also_view中的商品认为是相似的，这些可以做为正样本。
-为了让训练样本更加平衡，可以随机选择两个商品对做为负样本，选择负样本的数量跟正样本差不多。
+但他们的相似度应该不一样，also_buy是更强烈的偏好，我们设置相似度为2，also_view设置为1
+为了让训练样本更加平衡，可以随机选择两个商品对做为负样本，选择负样本的数量跟正样本差不多。负样本设置相似度为0。
 下面就基于这个思路来进行处理。
 
 """
@@ -82,12 +83,16 @@ def generate_data(out_path: str, item_dict: dict, test_ratio: float = 0.3):
                          "format):\n\n" +
                          formatted_input + "\n\n" +
                          "Based on above information, please predict if these two products are similar. The similarity " +
-                         "is between 0 and 1, 0 being lowest and 1 being highest. You just need to ranking the above " +
+                         "is between 0 and 2, 0 being lowest and 2 being highest. You just need to ranking the above " +
                          "product, do not explain the reason.")
+                if i in also_buy:
+                    output = "2"
+                else:
+                    output = "1"
                 res_dic = {
                     "instruction": instruction,
                     "input": input,
-                    "output": 1
+                    "output": output
                 }
                 data_list.append(res_dic)
 
@@ -114,12 +119,12 @@ def generate_data(out_path: str, item_dict: dict, test_ratio: float = 0.3):
                  "format):\n\n" +
                  formatted_input + "\n\n" +
                  "Based on above information, please predict if these two products are similar. The similarity " +
-                 "is between 0 and 1, 0 being lowest and 1 being highest. You just need to ranking the above " +
+                 "is between 0 and 2, 0 being lowest and 2 being highest. You just need to ranking the above " +
                  "product, do not explain the reason.")
         res_dic = {
             "instruction": instruction,
             "input": input,
-            "output": 0
+            "output": "0"
         }
         data_list.append(res_dic)
 
@@ -141,6 +146,6 @@ item_dict = get_metadata_dict()
 generate_data("../data", item_dict, 0.3)
 
 """
-    目前train.json 5385个样本。
-    目前test.json 2307个样本。
+    目前train.json 4616个样本。
+    目前test.json 3706个样本。
 """

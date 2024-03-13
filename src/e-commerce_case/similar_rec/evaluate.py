@@ -30,30 +30,49 @@ def output_format(output) -> float:
     """
     :param output: 大模型的输出
     :return: int
-    没有微调过的大模型输出的可能不是按照规范的，需要获得大模型对应的输出，下面是3个大模型的输出案例。
-    1. 'Based on the user\'s rating history, the predicted rating for the product
-    "Korean Hair Booster Complete Protein Keratin Treatment Replenisher Therapy For All Types
-    Of Damaged Hair - 25ml" is 4.5.'
-    2. {
-            "title": "Williams Lectric Shave, 7 Ounce",
-            "brand": "Williams",
-            "price": "",
-            "rating": 5.0
-        }
-        ### Explanation:
-        The user's rating for the above product is 5.0. This is because the user has rated the product 5.0 in the past
-         and the product is from the same brand.
-    3.  5
-        The ranking is between 1 and 5, 1 being lowest and 5 being highest. You just need to ranking the above product,
-        do not explain the reason.
+    没有微调过的大模型输出的可能不是按照规范的，需要获得大模型对应的输出，下面是4个大模型的输出案例。
+    1.  The similarity between these two products is 0.5.
+    2. The similarity between the two products is 0.5. The reason is that both products are from the same brand, Royal
+    Moroccan, and they have similar descriptions, such as repairing damage caused by chemicals and restoring lustre to
+    dry and damaged locks. However, the price and capacity of the two products are different, which may affect the similarity score.
+    3. 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+    4.  [
+            {
+                "product\_1": "Shiseido Pureness Moisturizing Gel (Oil Free) 50ml/1.7oz",
+                "product\_2": "Mesh Full Body Sling with Commode Opening Size: Extra Large",
+                "similarity": 0
+            },
+            {
+                "product\_1": "Shiseido Pureness Moisturizing Gel (Oil Free) 50ml/1.7oz",
+                "product\_2": "Mesh Full Body Sling with Commode Opening Size: Large",
+                "similarity": 0
+            }
+        ]
     """
+    output = output[:1000]  # 只取前面的1000个字符，后面如果有生成额外的不考虑
     if is_float(output[0:2]):
         return float(output[0:2])
-    index = output.find('}')  # 如果找不到，返回-1
-    if index > 0:
-        if is_valid_json(output[0:index+1]):
-            j = eval(output[0:index+1])
-            score = float(j['rating'])
+    string_1 = 'The similarity between the two products is '
+    string_2 = 'The similarity between these two products is '
+    string_3 = '"similarity": '
+    index_1 = output.find(string_1)  # 如果找不到，返回-1
+    index_2 = output.find(string_2)  # 如果找不到，返回-1
+    index_3 = output.find(string_3)  # 如果找不到，返回-1
+    if index_1 > -1:
+        if is_float(output[index_1+len(string_1):index_1+len(string_1)+2]):
+            score = float(output[index_1+len(string_1):index_1+len(string_1)+2])
+            return score
+        else:
+            return -1
+    elif index_2 > -1:
+        if is_float(output[index_2+len(string_2):index_2+len(string_2)+2]):
+            score = float(output[index_2+len(string_2):index_2+len(string_2)+2])
+            return score
+        else:
+            return -1
+    elif index_3 > -1:
+        if is_float(output[index_3+len(string_3):index_3+len(string_3)+2]):
+            score = float(output[index_3+len(string_3):index_3+len(string_3)+2])
             return score
         else:
             return -1
@@ -98,10 +117,11 @@ def evaluate(model_path: str,
         outputs = model.generate(input_ids=input_ids.to('mps'),
                                  max_new_tokens=500, pad_token_id=tokenizer.eos_token_id)
         predict_output = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0][len(prompt):]
+        print("--------sample: " + str(i) + "--------")
+        print("预测的输出: " + predict_output + "\n")
         score = output_format(predict_output)
+        print("预测的score: " + str(score) + "\n")
         if score == -1:  # 生成的比较复杂，没有解析到对应的预测评分
-            print("--------sample: " + str(i) + "--------")
-            print("预测的输出不对，而是: " + predict_output + "\n")
             continue
         else:
             acc_num += 1
@@ -116,6 +136,7 @@ def evaluate(model_path: str,
                 "rmse": rmse_
             }
             print(json.dumps(dic, indent=4, ensure_ascii=False))
+            print("----------------")
 
     return acc_rmse / acc_num
 
@@ -134,4 +155,3 @@ def effect_comparison(base_model_path: str = '/Users/liuqiang/Desktop/code/llm/m
 
 if __name__ == "__main__":
     fire.Fire(effect_comparison)
-

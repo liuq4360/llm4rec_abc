@@ -35,7 +35,7 @@ def embedding_recall(item_id: str,
     本函数只是一个方法式例，的实现效率不是很高，更好的实现方式是提前将所有商品的embedding计算出来并且放到faiss库（或者其它向量库）中，
     这样可以获得毫秒级的召回效率
     """
-    model = SentenceTransformer('/Users/liuqiang/Desktop/code/llm/models/bge-large-zh')
+    model = SentenceTransformer('/Users/liuqiang/Desktop/code/llm/models/bge-large-en-v1.5')
     item_title = item_dict[item_id]['title']
     item_desc = item_dict[item_id]['description'][0]
     item_info = "title: " + item_title + "\n" + "description: " + item_desc
