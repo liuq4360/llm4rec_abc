@@ -1,3 +1,4 @@
+import os
 import json
 import random
 import time
@@ -11,7 +12,7 @@ item_dict = get_metadata_dict()
 user_history = get_user_history()
 cold_start_items = get_cold_start_items()
 
-MOONSHOT_API_KEY = 'sk-8cjxTSVHcugQgumlsqPayHMFG8BLeOWjuaFST2YuW0W3tHv2'
+MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY")
 
 instruction = ("You are a product expert who predicts which of the two products "
                "users prefer based on your professional knowledge.")
